@@ -31,7 +31,7 @@ export default function Login() {
   return (
     <div style={styles.page}>
       {/* Left hero panel */}
-      <div style={styles.hero}>
+      <div style={styles.hero} className="auth-hero">
         <div style={styles.heroContent}>
           <div style={styles.heroLogo}>
             <Store size={28} color="#fff" />
@@ -50,8 +50,8 @@ export default function Login() {
       </div>
 
       {/* Right form panel */}
-      <div style={styles.formSide}>
-        <div style={styles.formBox} className="page-enter">
+      <div style={styles.formSide} className="auth-form-side">
+        <div style={styles.formBox} className="page-enter auth-form-box">
           <h2 style={styles.title}>Welcome back</h2>
           <p style={styles.subtitle}>Sign in to your account to continue</p>
 

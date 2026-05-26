@@ -2,24 +2,15 @@ import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Trash2, ArrowLeft, CheckCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import api from '../api/axios';
 import { useState } from 'react';
-
-// Specific Unsplash photos matched to each product name
-const IMAGE_MAP = {
-  'Wireless Noise-Cancelling Headphones': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=80&h=80&fit=crop&auto=format',
-  'Mechanical Keyboard':                  'https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=80&h=80&fit=crop&auto=format',
-  'USB-C Hub 7-in-1':                    'https://images.unsplash.com/photo-1625948515954-df0f5cf77e81?w=80&h=80&fit=crop&auto=format',
-  'Classic Fit Cotton T-Shirt':           'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=80&h=80&fit=crop&auto=format',
-  'Slim Fit Chino Pants':                 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=80&h=80&fit=crop&auto=format',
-  'Lightweight Running Jacket':           'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=80&h=80&fit=crop&auto=format',
-  'Clean Code by Robert C. Martin':       'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=80&h=80&fit=crop&auto=format',
-  'The Pragmatic Programmer':             'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=80&h=80&fit=crop&auto=format',
-};
+import { THUMB_MAP } from '../constants/productData';
 
 export default function Cart() {
   const { items, updateQty, removeItem, clearCart, total } = useCart();
   const { user } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderError, setOrderError] = useState('');
@@ -36,10 +27,17 @@ export default function Cart() {
       clearCart();
       setOrderSuccess(true);
     } catch (err) {
-      setOrderError(err.response?.data?.message || 'Order failed. Please try again.');
+      const msg = err.response?.data?.message || 'Order failed. Please try again.';
+      setOrderError(msg);
+      toast(msg, 'error');
     } finally {
       setPlacing(false);
     }
+  };
+
+  const handleRemove = (id, name) => {
+    removeItem(id);
+    toast(`"${name.split(' ').slice(0, 3).join(' ')}…" removed from cart`, 'warning');
   };
 
   if (orderSuccess) {
@@ -91,13 +89,13 @@ export default function Cart() {
             </button>
           </div>
         ) : (
-          <div style={styles.layout}>
+          <div className="cart-layout" data-testid="cart-layout">
             {/* Items list */}
             <div style={styles.itemsList} data-testid="cart-items">
               {items.map((item) => (
                 <div key={item._id} className="card" style={styles.itemCard} data-testid={`cart-item-${item._id}`}>
                   <img
-                    src={IMAGE_MAP[item.name] || `https://picsum.photos/seed/${item._id}/80/80`}
+                    src={THUMB_MAP[item.name] || `https://picsum.photos/seed/${item._id}/80/80`}
                     alt={item.name}
                     style={styles.itemImg}
                   />
@@ -108,7 +106,8 @@ export default function Cart() {
                       Subtotal: <strong style={{ color: 'var(--primary)' }}>${(item.price * item.qty).toFixed(2)}</strong>
                     </p>
                   </div>
-                  {/* BUG-04 intentional: flex-wrap missing on mobile <480px → qty controls overflow */}
+                  {/* BUG-04 intentional: flex-wrap missing on mobile <480px — qty controls overflow on narrow viewports.
+                      This is a preserved responsive UI defect for testing research. */}
                   <div style={styles.itemControls}>
                     <div style={styles.qtyRow}>
                       <button
@@ -127,7 +126,7 @@ export default function Cart() {
                     </div>
                     <button
                       className="btn-danger"
-                      onClick={() => removeItem(item._id)}
+                      onClick={() => handleRemove(item._id, item.name)}
                       data-testid={`btn-remove-${item._id}`}
                       style={{ padding: '7px 10px', borderRadius: 'var(--radius-md)' }}
                     >
@@ -139,7 +138,7 @@ export default function Cart() {
             </div>
 
             {/* Order summary */}
-            <div className="card" style={styles.summary}>
+            <div className="card cart-summary" style={styles.summary}>
               <h3 style={styles.summaryTitle}>Order Summary</h3>
               <hr className="divider" />
 
@@ -210,12 +209,6 @@ const styles = {
   },
   emptyTitle: { fontSize: '1.3rem', fontWeight: 700, marginTop: 16, color: 'var(--text-1)' },
   emptyMsg: { color: 'var(--text-3)', marginTop: 8 },
-  layout: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 320px',
-    gap: 28,
-    alignItems: 'start',
-  },
   itemsList: { display: 'flex', flexDirection: 'column', gap: 16 },
   itemCard: {
     display: 'flex',

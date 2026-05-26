@@ -9,12 +9,10 @@ import { useChat } from '../context/ChatContext';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
-  const { items } = useCart();
+  const { itemCount } = useCart();
   const { toggle: toggleChat, isOpen: chatOpen } = useChat();
   const navigate = useNavigate();
   const location = useLocation();
-
-  const cartCount = items.reduce((sum, i) => sum + i.qty, 0);
 
   const handleLogout = () => { logout(); navigate('/login'); };
 
@@ -31,7 +29,7 @@ export default function Navbar() {
         </Link>
 
         {/* Nav links */}
-        <div style={styles.links}>
+        <div style={styles.links} className="nav-links-gap">
           <Link
             to="/products"
             style={{ ...styles.link, ...(isActive('/products') ? styles.linkActive : {}) }}
@@ -59,8 +57,8 @@ export default function Navbar() {
                 title="Cart"
               >
                 <ShoppingCart size={18} />
-                {cartCount > 0 && (
-                  <span style={styles.cartBadge} data-testid="cart-badge">{cartCount}</span>
+                {itemCount > 0 && (
+                  <span style={styles.cartBadge} data-testid="cart-badge">{itemCount}</span>
                 )}
               </Link>
 
@@ -76,7 +74,7 @@ export default function Navbar() {
               {/* User avatar */}
               <div style={styles.userChip} data-testid="nav-user">
                 <div style={styles.avatar}>{user.name.charAt(0).toUpperCase()}</div>
-                <span style={styles.userName}>{user.name.split(' ')[0]}</span>
+                <span style={styles.userName} className="nav-user-name">{user.name.split(' ')[0]}</span>
               </div>
 
               <button

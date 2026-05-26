@@ -18,7 +18,8 @@ router.get('/', async (req, res) => {
     const products = await Product.find(filter).sort({ createdAt: -1 });
     res.json(products);
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    console.error('Products fetch error:', err.message);
+    res.status(500).json({ message: 'Failed to load products.' });
   }
 });
 
@@ -29,11 +30,12 @@ router.get('/:id', async (req, res) => {
     if (!product) return res.status(404).json({ message: 'Product not found' });
     res.json(product);
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    console.error('Product fetch error:', err.message);
+    res.status(500).json({ message: 'Failed to load product.' });
   }
 });
 
-// POST /api/products — no auth (for seeding / testing convenience)
+// POST /api/products — unauthenticated (seeding / testing convenience only)
 router.post('/', async (req, res) => {
   try {
     const product = await Product.create(req.body);

@@ -40,13 +40,13 @@ export default function Products() {
       {/* Hero banner */}
       <div style={styles.hero}>
         <div className="container">
-          <div style={styles.heroInner}>
+          <div style={styles.heroInner} className="products-hero-inner">
             <div>
               <h1 style={styles.heroTitle}>Discover Products</h1>
               <p style={styles.heroSub}>Electronics, Clothing & Books — all in one place</p>
             </div>
             {/* Search bar in hero */}
-            <div style={styles.heroSearch}>
+            <div style={styles.heroSearch} className="products-hero-search">
               <Search size={18} style={{ color: 'var(--text-4)', flexShrink: 0 }} />
               <input
                 type="text"

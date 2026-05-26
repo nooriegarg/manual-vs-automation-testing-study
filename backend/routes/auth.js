@@ -4,8 +4,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// BUG-01 (intentional): Loose email regex — accepts "a@b" without TLD.
-// This is a deliberate testing edge case for boundary/validation testing.
+// BUG-01 (intentional): Loose email regex — accepts "a@b" without requiring a TLD.
+// A correct regex would be: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+// Preserved as a boundary/validation test case for QA research.
 const looseEmailRegex = /^[^\s@]+@[^\s@]+$/;
 
 // POST /api/auth/register
@@ -41,7 +42,8 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email } });
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    console.error('Register error:', err.message);
+    res.status(500).json({ message: 'Registration failed. Please try again.' });
   }
 });
 
@@ -72,7 +74,8 @@ router.post('/login', async (req, res) => {
 
     res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    console.error('Login error:', err.message);
+    res.status(500).json({ message: 'Login failed. Please try again.' });
   }
 });
 

@@ -17,11 +17,14 @@ export function CartProvider({ children }) {
     });
   };
 
-  // BUG-03 (intentional): Setting qty to 0 does NOT remove the item.
-  // A real implementation would auto-remove. This is a boundary value test case.
+  // BUG-03 (intentional): Setting qty to 0 does NOT auto-remove the item.
+  // A correct implementation would call removeItem when qty reaches 0.
+  // This is preserved as a boundary value test case for QA research.
+  // Note: qty is clamped at minimum 0 to prevent display of negative quantities.
   const updateQty = (id, qty) => {
+    const safeQty = Math.max(0, qty);
     setItems((prev) =>
-      prev.map((i) => (i._id === id ? { ...i, qty } : i))
+      prev.map((i) => (i._id === id ? { ...i, qty: safeQty } : i))
     );
   };
 
@@ -31,11 +34,13 @@ export function CartProvider({ children }) {
 
   const clearCart = () => setItems([]);
 
-  // Total price calculation
+  const itemCount = items.reduce((sum, i) => sum + i.qty, 0);
+
+  // Total only counts items with qty > 0 (BUG-03 means qty=0 items remain but cost $0)
   const total = items.reduce((sum, i) => sum + i.price * i.qty, 0);
 
   return (
-    <CartContext.Provider value={{ items, addToCart, updateQty, removeItem, clearCart, total }}>
+    <CartContext.Provider value={{ items, addToCart, updateQty, removeItem, clearCart, total, itemCount }}>
       {children}
     </CartContext.Provider>
   );

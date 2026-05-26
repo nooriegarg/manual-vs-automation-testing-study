@@ -295,3 +295,70 @@ input::placeholder { color: var(--text-4); }
 
 /* ── Page animation ─────────────────────────────────────── */
 .page-enter { animation: fadeIn 0.3s ease both; }
+
+/* ── Cart layout ────────────────────────────────────────── */
+.cart-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 28px;
+  align-items: start;
+}
+@media (max-width: 768px) {
+  .cart-layout {
+    grid-template-columns: 1fr;
+  }
+  .cart-summary {
+    position: static !important;
+  }
+}
+
+/* ── Product detail layout ───────────────────────────────── */
+.detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+@media (max-width: 768px) {
+  .detail-layout {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}
+
+/* ── Auth pages (login / register) ──────────────────────── */
+@media (max-width: 640px) {
+  /* Hide hero panel on small screens — form takes full width */
+  .auth-hero { display: none !important; }
+  .auth-form-side {
+    flex: 1 !important;
+    padding: 24px 16px !important;
+  }
+  .auth-form-box {
+    padding: 28px 20px !important;
+    border-radius: var(--radius-lg) !important;
+  }
+}
+
+/* ── Navbar mobile ───────────────────────────────────────── */
+@media (max-width: 580px) {
+  .nav-user-name { display: none; }
+  .nav-links-gap { gap: 4px !important; }
+}
+
+/* ── Products hero search ────────────────────────────────── */
+@media (max-width: 640px) {
+  .products-hero-inner {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .products-hero-search {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+}
+
+/* ── General mobile spacing ──────────────────────────────── */
+@media (max-width: 480px) {
+  .container { padding: 0 16px; }
+}

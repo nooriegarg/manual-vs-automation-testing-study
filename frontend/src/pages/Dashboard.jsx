@@ -1,8 +1,22 @@
 import { useEffect, useState } from 'react';
-import { Package, ShoppingBag, DollarSign, User } from 'lucide-react';
+import { Package, ShoppingBag, DollarSign, User, RefreshCw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+
+function StatCard({ bg, iconColor, icon, value, label }) {
+  return (
+    <div className="card" style={styles.statCard}>
+      <div style={{ ...styles.statIconBase, background: bg }}>
+        {icon}
+      </div>
+      <div>
+        <p style={styles.statValue}>{value}</p>
+        <p style={styles.statLabel}>{label}</p>
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -11,19 +25,20 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const res = await api.get('/orders');
-        setOrders(res.data);
-      } catch {
-        setError('Failed to load orders.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchOrders();
-  }, []);
+  const fetchOrders = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await api.get('/orders');
+      setOrders(res.data);
+    } catch {
+      setError('Failed to load orders. Check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchOrders(); }, []);
 
   const totalSpent = orders.reduce((sum, o) => sum + o.total, 0);
 
@@ -31,7 +46,7 @@ export default function Dashboard() {
     <div>
       {/* Page header */}
       <div style={styles.hero}>
-        <div className="container" style={styles.heroInner}>
+        <div className="container">
           <div style={styles.profileSection}>
             <div style={styles.avatar}>{user?.name?.charAt(0).toUpperCase()}</div>
             <div>
@@ -45,33 +60,24 @@ export default function Dashboard() {
       <div className="container" style={styles.body}>
         {/* Stats row */}
         <div style={styles.statsRow}>
-          <div className="card" style={styles.statCard}>
-            <div style={styles.statIcon('#eef2ff', '#4f46e5')}>
-              <ShoppingBag size={20} color="#4f46e5" />
-            </div>
-            <div>
-              <p style={styles.statValue}>{orders.length}</p>
-              <p style={styles.statLabel}>Total Orders</p>
-            </div>
-          </div>
-          <div className="card" style={styles.statCard}>
-            <div style={styles.statIcon('#f0fdf4', '#16a34a')}>
-              <DollarSign size={20} color="#16a34a" />
-            </div>
-            <div>
-              <p style={styles.statValue}>${totalSpent.toFixed(2)}</p>
-              <p style={styles.statLabel}>Total Spent</p>
-            </div>
-          </div>
-          <div className="card" style={styles.statCard}>
-            <div style={styles.statIcon('#fdf4ff', '#9333ea')}>
-              <User size={20} color="#9333ea" />
-            </div>
-            <div>
-              <p style={styles.statValue}>Active</p>
-              <p style={styles.statLabel}>Account Status</p>
-            </div>
-          </div>
+          <StatCard
+            bg="#eef2ff" iconColor="#4f46e5"
+            icon={<ShoppingBag size={20} color="#4f46e5" />}
+            value={orders.length}
+            label="Total Orders"
+          />
+          <StatCard
+            bg="#f0fdf4" iconColor="#16a34a"
+            icon={<DollarSign size={20} color="#16a34a" />}
+            value={`$${totalSpent.toFixed(2)}`}
+            label="Total Spent"
+          />
+          <StatCard
+            bg="#fdf4ff" iconColor="#9333ea"
+            icon={<User size={20} color="#9333ea" />}
+            value="Active"
+            label="Account Status"
+          />
         </div>
 
         {/* Orders section */}
@@ -89,8 +95,17 @@ export default function Dashboard() {
               <span style={{ color: 'var(--text-3)', marginLeft: 12 }}>Loading orders…</span>
             </div>
           )}
-          {error && <p className="error-msg" data-testid="orders-error">{error}</p>}
-          {!loading && orders.length === 0 && (
+
+          {error && !loading && (
+            <div style={styles.errorState} data-testid="orders-error">
+              <p className="error-msg">{error}</p>
+              <button className="btn-ghost" style={{ marginTop: 12 }} onClick={fetchOrders}>
+                <RefreshCw size={14} /> Try again
+              </button>
+            </div>
+          )}
+
+          {!loading && !error && orders.length === 0 && (
             <div style={styles.emptyState} data-testid="no-orders">
               <span style={{ fontSize: '2.5rem' }}>📦</span>
               <p style={styles.emptyMsg}>No orders yet. Start shopping!</p>
@@ -106,7 +121,9 @@ export default function Dashboard() {
                 <div style={styles.orderHeader}>
                   <div>
                     <span style={styles.orderId}>Order #{order._id.slice(-6).toUpperCase()}</span>
-                    <span style={styles.orderDate}>{new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                    <span style={styles.orderDate}>
+                      {new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </span>
                   </div>
                   <span className="badge badge-success" style={{ padding: '4px 12px', borderRadius: 'var(--radius-full)', fontSize: '0.78rem' }}>
                     Delivered
@@ -157,9 +174,7 @@ const styles = {
   hero: {
     background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
     padding: '36px 0',
-    marginBottom: 0,
   },
-  heroInner: {},
   profileSection: { display: 'flex', alignItems: 'center', gap: 20 },
   avatar: {
     width: 64, height: 64, borderRadius: '50%',
@@ -184,13 +199,12 @@ const styles = {
     alignItems: 'center',
     gap: 16,
   },
-  statIcon: (bg, color) => ({
+  statIconBase: {
     width: 44, height: 44,
     borderRadius: 'var(--radius-md)',
-    background: bg,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     flexShrink: 0,
-  }),
+  },
   statValue: { fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-1)' },
   statLabel: { fontSize: '0.82rem', color: 'var(--text-3)', marginTop: 2 },
   section: {},
@@ -199,6 +213,7 @@ const styles = {
     marginBottom: 20, flexWrap: 'wrap', gap: 12,
   },
   center: { display: 'flex', alignItems: 'center', padding: '32px 0', color: 'var(--text-3)' },
+  errorState: { padding: '16px 0' },
   emptyState: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 0', textAlign: 'center' },
   emptyMsg: { color: 'var(--text-3)', marginTop: 10 },
   ordersList: { display: 'flex', flexDirection: 'column', gap: 20 },

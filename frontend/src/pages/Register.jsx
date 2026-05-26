@@ -42,7 +42,7 @@ export default function Register() {
   return (
     <div style={styles.page}>
       {/* Left hero */}
-      <div style={styles.hero}>
+      <div style={styles.hero} className="auth-hero">
         <div style={styles.heroContent}>
           <div style={styles.heroLogo}><Store size={28} color="#fff" /></div>
           <h1 style={styles.heroTitle}>Join ShopLab</h1>
@@ -59,8 +59,8 @@ export default function Register() {
       </div>
 
       {/* Right form */}
-      <div style={styles.formSide}>
-        <div style={styles.formBox} className="page-enter">
+      <div style={styles.formSide} className="auth-form-side">
+        <div style={styles.formBox} className="page-enter auth-form-box">
           <h2 style={styles.title}>Create account</h2>
           <p style={styles.subtitle}>Fill in the details below to get started</p>
 

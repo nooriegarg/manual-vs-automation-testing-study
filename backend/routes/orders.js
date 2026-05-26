@@ -12,6 +12,10 @@ router.post('/', authMiddleware, async (req, res) => {
       return res.status(400).json({ message: 'Cart is empty' });
     }
 
+    if (typeof total !== 'number' || total < 0) {
+      return res.status(400).json({ message: 'Invalid order total' });
+    }
+
     const order = await Order.create({
       userId: req.user.userId,
       items,
@@ -20,7 +24,8 @@ router.post('/', authMiddleware, async (req, res) => {
 
     res.status(201).json(order);
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    console.error('Order error:', err.message);
+    res.status(500).json({ message: 'Failed to place order. Please try again.' });
   }
 });
 
@@ -30,7 +35,8 @@ router.get('/', authMiddleware, async (req, res) => {
     const orders = await Order.find({ userId: req.user.userId }).sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    console.error('Orders fetch error:', err.message);
+    res.status(500).json({ message: 'Failed to load orders.' });
   }
 });
 
