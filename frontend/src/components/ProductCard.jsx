@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-
 // Specific Unsplash photos matched exactly to each product (no API key needed)
 const IMAGE_MAP = {
   'Wireless Noise-Cancelling Headphones': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=280&fit=crop&auto=format',
@@ -15,7 +14,6 @@ const IMAGE_MAP = {
   'Clean Code by Robert C. Martin':       'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=280&fit=crop&auto=format',
   'The Pragmatic Programmer':             'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=400&h=280&fit=crop&auto=format',
 };
-
 // Static ratings per product (realistic research data)
 const RATING_MAP = {
   'Wireless Noise-Cancelling Headphones': 4.5,
@@ -27,7 +25,6 @@ const RATING_MAP = {
   'Clean Code by Robert C. Martin': 4.9,
   'The Pragmatic Programmer': 4.8,
 };
-
 function StarRating({ rating }) {
   return (
     <div className="stars" style={{ gap: 3 }}>
@@ -46,26 +43,22 @@ function StarRating({ rating }) {
     </div>
   );
 }
-
 export default function ProductCard({ product }) {
   const { addToCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [hovered, setHovered] = useState(false);
   const [added, setAdded] = useState(false);
-
   const imgSrc = IMAGE_MAP[product.name] || `https://picsum.photos/seed/${product._id}/400/280`;
   const rating = RATING_MAP[product.name] || 4.2;
   const isLowStock = product.stock > 0 && product.stock < 5;
   const outOfStock = product.stock === 0;
-
   const handleAdd = () => {
     if (!user) { navigate('/login'); return; }
     addToCart(product);
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
   };
-
   return (
     <div
       className="card"
@@ -73,9 +66,11 @@ export default function ProductCard({ product }) {
         ...styles.card,
         transform: hovered ? 'translateY(-5px)' : 'translateY(0)',
         boxShadow: hovered ? 'var(--shadow-lg)' : 'var(--shadow-sm)',
+        cursor: 'pointer',
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={() => navigate(`/products/${product._id}`)}
       data-testid={`product-card-${product._id}`}
     >
       {/* Image */}
@@ -90,7 +85,6 @@ export default function ProductCard({ product }) {
         {isLowStock && <span style={styles.lowStockBadge}>Only {product.stock} left</span>}
         {outOfStock && <span style={styles.outOfStockBadge}>Out of Stock</span>}
       </div>
-
       {/* Body */}
       <div style={styles.body}>
         <StarRating rating={rating} />
@@ -98,9 +92,7 @@ export default function ProductCard({ product }) {
         <h3 style={styles.name} data-testid={`product-name-${product._id}`}>
           {product.name}
         </h3>
-
         <p style={styles.description}>{product.description}</p>
-
         {/* Stock indicator */}
         <div style={styles.stockRow}>
           <span style={{ ...styles.stockDot, background: outOfStock ? '#ef4444' : isLowStock ? '#f59e0b' : '#22c55e' }} />
@@ -108,7 +100,6 @@ export default function ProductCard({ product }) {
             {outOfStock ? 'Out of stock' : isLowStock ? 'Low stock' : 'In stock'}
           </span>
         </div>
-
         {/* Price + CTA */}
         <div style={styles.footer}>
           <div>
@@ -119,11 +110,10 @@ export default function ProductCard({ product }) {
               ${(product.price * 1.15).toFixed(2)}
             </span>
           </div>
-
           <button
             className="btn-primary"
             style={{ padding: '8px 14px', fontSize: '0.83rem', ...(outOfStock ? {} : {}) }}
-            onClick={handleAdd}
+            onClick={(e) => { e.stopPropagation(); handleAdd(); }}
             disabled={outOfStock}
             data-testid={`btn-add-to-cart-${product._id}`}
           >
@@ -138,7 +128,6 @@ export default function ProductCard({ product }) {
     </div>
   );
 }
-
 const styles = {
   card: {
     padding: 0,
@@ -146,7 +135,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     transition: 'transform 0.22s ease, box-shadow 0.22s ease',
-    cursor: 'default',
+    cursor: 'pointer',
   },
   imgWrap: {
     position: 'relative',

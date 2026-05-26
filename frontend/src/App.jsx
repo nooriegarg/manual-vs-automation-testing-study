@@ -7,12 +7,11 @@ import Register from './pages/Register';
 import Products from './pages/Products';
 import Cart from './pages/Cart';
 import Dashboard from './pages/Dashboard';
+import ProductDetail from './pages/ProductDetail';
 import NotFound from './pages/NotFound';
 import ChatBot from './components/ChatBot';
-
 export default function App() {
   const { isOpen } = useChat();
-
   return (
     <BrowserRouter>
       <div className={`app-layout${isOpen ? ' panel-open' : ''}`}>
@@ -22,6 +21,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
